@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="hr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FPL Predictions</title>
+    
+    <!-- DataTables CSS -->
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
+    <!-- FixedHeader CSS za DataTables -->
+    <link rel="stylesheet" href="https://cdn.datatables.net/fixedheader/3.4.0/css/fixedHeader.dataTables.min.css">
+    
+    <style>
+        body {
+            background-color: #121212;
+            color: #ffffff;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+
+        /* Vrhunski glavni meni */
+        .main-menu {
+            background-color: #1a1a1a;
+            border-bottom: 1px solid #333;
+            padding: 12px 25px;
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .main-menu a {
+            color: #aaaaaa;
+            text-decoration: none;
+            font-weight: 600;
+            padding: 8px 16px;
+            border-radius: 4px;
+            transition: all 0.2s ease;
+        }
+
+        .main-menu a:hover {
+            color: #00ff88;
+            background-color: #262626;
+        }
+
+        .main-menu a.active {
+            color: #00ff88;
+            background-color: #262626;
+            border: 1px solid #00ff8844;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        h1 {
+            text-align: center;
+            color: #00ff88;
+            margin-bottom: 20px;
+        }
+
+        /* Stilovi za filter sekciju */
+        .filter-section {
+            background-color: #1e1e1e;
+            padding: 15px 20px;
+            border-radius: 8px;
+            margin-bottom: 25px;
+            border: 1px solid #333;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .filter-group {
+            flex: 1;
+            min-width: 250px;
+        }
+
+        .filter-group h3 {
+            margin-top: 0;
+            margin-bottom: 10px;
+            color: #00ff88;
+            font-size: 16px;
+        }
+
+        .checkbox-container {
+            max-height: 120px;
+            overflow-y: auto;
+            background-color: #121212;
+            padding: 8px;
+            border-radius: 4px;
+            border: 1px solid #444;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .checkbox-container label {
+            font-size: 14px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .checkbox-container input {
+            accent-color: #00ff88;
+            cursor: pointer;
+        }
+
+        .filter-actions {
+            margin-top: 10px;
+        }
+
+        .filter-actions button {
+            background-color: #262626;
+            color: #ffffff;
+            border: 1px solid #555;
+            padding: 5px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 13px;
+        }
+
+        .filter-actions button:hover {
+            background-color: #00ff88;
+            color: #000;
+            border-color: #00ff88;
+            font-weight: bold;
+        }
+
+        /* Stiliziranje tablice */
+        table.dataTable {
+            width: 100% !important;
+            border-collapse: collapse;
+            background-color: #1e1e1e;
+            color: #ffffff !important;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        table.dataTable th, table.dataTable td {
+            padding: 12px 15px;
+            text-align: center;
+            border-bottom: 1px solid #333333;
+        }
+
+        table.dataTable th {
+            background-color: #262626 !important;
+            color: #00ff88;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        /* Zadavanje boje fiksiranom zaglavlju kod skrolanja */
+        .fixedHeader-floating {
+            background-color: #262626 !important;
+            border-bottom: 2px solid #00ff88 !important;
+        }
+
+        table.dataTable tbody tr:hover {
+            background-color: #2a2a2a;
+        }
+
+        table.dataTable tbody tr.row-doubtful {
+            background-color: #382e0c !important;
+            color: #fff8d6 !important;
+        }
+
+        table.dataTable tbody tr.row-injured {
+            background-color: #3b1414 !important;
+            color: #ffd6d6 !important;
+        }
+
+        .dataTables_wrapper {
+            color: #ffffff;
+        }
+
+        .dataTables_filter {
+            display: none !important;
+        }
+
+        .dataTables_paginate .paginate_button {
+            color: #ffffff !important;
+            background-color: #262626 !important;
+            border: 1px solid #444 !important;
+            border-radius: 4px;
+            margin: 2px;
+        }
+
+        .dataTables_paginate .paginate_button.current {
+            background-color: #00ff88 !important;
+            color: #000000 !important;
+            font-weight: bold;
+            border: 1px solid #00ff88 !important;
+        }
+
+        .dataTables_info {
+            color: #aaaaaa !important;
+        }
+
+        .text-left {
+            text-align: left !important;
+        }
+
+        .highlight-gi {
+            color: #00ff88;
+            font-weight: bold;
+        }
+
+        .highlight-10gw {
+            color: #00d2ff;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Glavni Navigacijski Meni -->
+    <nav class="main-menu">
+        <a href="index.html">Form Guide</a>
+        <a href="predictions.html" class="active">Prediction Model</a>
+    </nav>
+
+    <div class="container">
+        <h1>FPL Player Predictions Model</h1>
+        
+        <!-- Filter sekcija sa checklistama -->
+        <div class="filter-section">
+            <div class="filter-group">
+                <h3>Clubs</h3>
+                <div id="teamCheckboxes" class="checkbox-container">
+                    <!-- Dinamički klubovi -->
+                </div>
+                <div class="filter-actions">
+                    <button type="button" id="selectAllTeams">Select All</button>
+                    <button type="button" id="clearAllTeams">Deselect All</button>
+                </div>
+            </div>
+
+            <div class="filter-group">
+                <h3>Positions</h3>
+                <div id="positionCheckboxes" class="checkbox-container">
+                    <!-- Dinamičke pozicije -->
+                </div>
+                <div class="filter-actions">
+                    <button type="button" id="selectAllPositions">Select All</button>
+                    <button type="button" id="clearAllPositions">Deselect All</button>
+                </div>
+            </div>
+        </div>
+        
+        <table id="predTable" class="display">
+            <thead>
+                <tr>
+                    <th class="text-left">Name</th>
+                    <th class="text-left">Club</th>
+                    <th>Pos</th>
+                    <th>Price (£m)</th>
+                    <th>Next Opponent</th>
+                    <th>Projected GI (Next GW)</th>
+                    <th>Projected GI (Next 5 GWs)</th>
+                    <th>Projected GI (Next 10 GWs)</th>
+                </tr>
+            </thead>
+            <tbody id="tableBody">
+                <!-- Podaci se učitavaju automatski -->
+            </tbody>
+        </table>
+    </div>
+
+    <!-- jQuery, DataTables JS i FixedHeader JS -->
+    <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/fixedheader/3.4.0/js/dataTables.fixedHeader.min.js"></script>
+
+    <script>
+        $(document).ready(function() {
+            let table;
+
+            $.fn.dataTable.ext.search.push(function(settings, data, dataIndex) {
+                let playerClub = data[1];
+                let playerPos = data[2];
+
+                let selectedTeams = [];
+                $('#teamCheckboxes input:checked').each(function() {
+                    selectedTeams.push($(this).val());
+                });
+
+                let selectedPositions = [];
+                $('#positionCheckboxes input:checked').each(function() {
+                    selectedPositions.push($(this).val());
+                });
+
+                let matchTeam = selectedTeams.length === 0 || selectedTeams.includes(playerClub);
+                let matchPos = selectedPositions.length === 0 || selectedPositions.includes(playerPos);
+
+                return matchTeam && matchPos;
+            });
+
+            $.getJSON('predictions.json', function(data) {
+                let rowsHtml = '';
+                let teamsSet = new Set();
+                let positionsSet = new Set();
+
+                data.forEach(player => {
+                    teamsSet.add(player.team);
+                    positionsSet.add(player.position);
+
+                    let next10 = player.projected_gi_next10 !== undefined ? player.projected_gi_next10 : 0.00;
+                    let chance = player.chance_of_playing !== undefined ? player.chance_of_playing : 100;
+                    
+                    let rowClassAttr = '';
+                    if (chance === 50 || chance === 75) {
+                        rowClassAttr = 'data-status="doubtful"';
+                    } else if (chance === 0 || chance === 25) {
+                        rowClassAttr = 'data-status="injured"';
+                    } else {
+                        rowClassAttr = 'data-status="ok"';
+                    }
+
+                    rowsHtml += `
+                        <tr ${rowClassAttr}>
+                            <td class="text-left"><strong>${player.name}</strong> ${chance < 100 ? `<span style="font-size: 11px; color: #ffadad;">(${chance}%)</span>` : ''}</td>
+                            <td class="text-left">${player.team}</td>
+                            <td>${player.position}</td>
+                            <td>${player.price}</td>
+                            <td>${player.next_opponent}</td>
+                            <td class="highlight-gi">${player.projected_gi_next}</td>
+                            <td class="highlight-gi">${player.projected_gi_next5}</td>
+                            <td class="highlight-10gw">${next10}</td>
+                        </tr>
+                    `;
+                });
+
+                $('#tableBody').html(rowsHtml);
+
+                let sortedTeams = Array.from(teamsSet).sort();
+                let teamHtml = '';
+                sortedTeams.forEach(team => {
+                    teamHtml += `<label><input type="checkbox" value="${team}" checked> ${team}</label>`;
+                });
+                $('#teamCheckboxes').html(teamHtml);
+
+                const customPosOrder = ["GKP", "DEF", "MID", "FWD"];
+                let sortedPositions = customPosOrder.filter(pos => positionsSet.has(pos));
+                
+                let posHtml = '';
+                sortedPositions.forEach(pos => {
+                    posHtml += `<label><input type="checkbox" value="${pos}" checked> ${pos}</label>`;
+                });
+                $('#positionCheckboxes').html(posHtml);
+
+                // Inicijalizacija DataTables s uključenim FixedHeader-om
+                table = $('#predTable').DataTable({
+                    "pageLength": 25,
+                    "lengthChange": false,
+                    "order": [[ 5, "desc" ]],
+                    "fixedHeader": true, // OVO ZALIJEPLJUJE ZAGLAVLJE NA VRH KOD SKROLANJA
+                    "createdRow": function(row, data, dataIndex) {
+                        let status = $(row).attr('data-status');
+                        if (status === 'doubtful') {
+                            $(row).addClass('row-doubtful');
+                        } else if (status === 'injured') {
+                            $(row).addClass('row-injured');
+                        }
+                    },
+                    "language": {
+                        "info": "Showing _START_ to _END_ of total _TOTAL_ players",
+                        "paginate": {
+                            "first": "Prva",
+                            "last": "Zadnja",
+                            "next": "Next",
+                            "previous": "Prev"
+                        },
+                        "zeroRecords": "No players found"
+                    }
+                });
+
+                $(document).on('change', '.checkbox-container input', function() {
+                    table.draw();
+                });
+
+                $('#selectAllTeams').click(function() {
+                    $('#teamCheckboxes input').prop('checked', true);
+                    table.draw();
+                });
+                $('#clearAllTeams').click(function() {
+                    $('#teamCheckboxes input').prop('checked', false);
+                    table.draw();
+                });
+
+                $('#selectAllPositions').click(function() {
+                    $('#positionCheckboxes input').prop('checked', true);
+                    table.draw();
+                });
+                $('#clearAllPositions').click(function() {
+                    $('#positionCheckboxes input').prop('checked', false);
+                    table.draw();
+                });
+
+            }).fail(function() {
+                alert("Greška pri učitavanju 'predictions.json'. Provjeri jesi li generirao fajl pomoću skripte!");
+            });
+        });
+    </script>
+
+</body>
+</html>
